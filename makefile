@@ -1,12 +1,21 @@
 #Makefile for cs243 benchmarking project
 
 INPUT_FOLDER = src
-OUTPUT_NAME = benchmark_suite.exe
+BENCHMARKS_FOLDER = src/benchmarks
+OUTPUT_NAME = benchmark_suite
+
 
 #todo: different gcc flags will output different output names
 
-all:
-    gcc -o $(OUTPUT_NAME) $(INPUT_FOLDER)/benchmark.c $(INPUT_FOLDER)/benchmarks/*.c $(INPUT_FOLDER)/include/*
+default:
+	gcc -o $(OUTPUT_NAME) $(INPUT_FOLDER)/benchmark.c
+	@cd $(BENCHMARKS_FOLDER) ; make -s all
 
 clean:
-    rm $(OUTPUT_NAME)
+	@if [ -a $(OUTPUT_NAME) ] ; \
+	then \
+		echo rm $(OUTPUT_NAME) ; \
+		rm $(OUTPUT_NAME) ; \
+	fi;
+	@cd $(BENCHMARKS_FOLDER) ; make -s clean
+

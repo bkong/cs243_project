@@ -1,7 +1,5 @@
 /* Basic benchmark just to sleep for 2 seconds */
-#include "../include/benchmark.h"
-
-void sleep_benchmark()
+int main(int argc, char **argv)
 {
 	sleep(2);
 }
