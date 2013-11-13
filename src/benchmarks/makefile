@@ -8,8 +8,8 @@ PROGS = $(patsubst %.c,%,$(BENCHMARKS))
 all: $(PROGS)
 
 %: %.c
-	@echo gcc -o $@ $<
-	@gcc -o $@ $<
+	@echo gcc -std=c99 -o $@ $<
+	@gcc -std=c99 -o $@ $<
 
 clean:
 	@if [ -a $(OUTPUT_NAME) ] ; \
