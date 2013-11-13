@@ -20,6 +20,7 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <dirent.h>
+#include <errno.h>
 
 #define MAX_BENCHMARKS 10
 #define BENCHMARK_FOLDER "./src/benchmarks/"
@@ -27,6 +28,8 @@
 static void __run_benchmark(char *benchmark);
 static int __is_benchmark_file(const char *name);
 static char **__get_benchmark_names();
+
+extern int errno;
 
 int main(int argc, char **argv)
 {
@@ -127,7 +130,7 @@ static uint64_t __get_clk()
 static void __run_benchmark(char *benchmark)
 {
     uint64_t start, end;
-    static char *argv[] = {""};
+    static char *argv[] = {"", NULL};
     char path[strlen(BENCHMARK_FOLDER) + strlen(benchmark) + 1];
     strcpy(path, BENCHMARK_FOLDER);
     strcat(path, benchmark);
@@ -138,7 +141,9 @@ static void __run_benchmark(char *benchmark)
     pid_t pid = fork();
     if (pid == 0)   // Child process
     {
-        execv(path, argv); 
+        if(execv(path, argv)<0);{
+        		printf("Errno is %d\n", errno);
+        }
         exit(-1);
     }
     else // Parent Process
