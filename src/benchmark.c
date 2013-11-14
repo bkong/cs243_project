@@ -87,9 +87,9 @@ static char **__get_benchmark_names()
             if (__is_benchmark_file(name))
             {
                 int len = strlen(name);
-                char bench_name[len];
+                char bench_name[len-1];
                 strncpy(bench_name, name, len - 2);
-                bench_name[len - 1] = '\0'; // null terminate the string
+                bench_name[len-2] = '\0'; // null terminate the string
                 names[dircnt] = malloc(sizeof(char)*strlen(bench_name));
                 strcpy(names[dircnt++], bench_name);
             }
