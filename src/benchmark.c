@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
 static char **__get_benchmark_names()
 {
-    char **names = malloc(sizeof(char*) * MAX_BENCHMARKS);
+    char **names = malloc(sizeof(char*) * MAX_BENCHMARKS); // create array of char pointers
     DIR *d;
     int dircnt = 0;
     struct dirent *dir;
@@ -81,15 +81,16 @@ static char **__get_benchmark_names()
     {
         while ((dir = readdir(d)) != NULL)
         {
-            char *name = dir->d_name;
+            char *name = dir->d_name; // get the filename
             if (__is_benchmark_file(name))
             {
                 int len = strlen(name);
                 char bench_name[len-1];
-                strncpy(bench_name, name, len - 2);
+                strncpy(bench_name, name, len - 2); // remove the '.c' part
                 bench_name[len-2] = '\0'; // null terminate the string
-                names[dircnt] = malloc(sizeof(char)*strlen(bench_name));
-                strcpy(names[dircnt++], bench_name);
+                names[dircnt] = malloc(sizeof(char)*strlen(bench_name)+1);
+                strcpy(names[dircnt], bench_name); // add the file to the array
+                dircnt++;
             }
         }
         closedir(d);
@@ -158,7 +159,7 @@ static void __run_benchmark(char *benchmark)
         total_clk += (end - start);
     }
     printf("Benchmark Complete.\n");
-    printf("Average number of clock cycles for %d iterations: %" PRIu64 "\n", ITERATIONS, (total_clk / ITERATIONS));
+    printf("Average number of clock cycles for %d iterations: %f million\n", ITERATIONS, (total_clk / ITERATIONS)/1000000.0);
 }
 
 
