@@ -21,6 +21,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #define MAX_BENCHMARKS 10
 #define BENCHMARK_FOLDER "./src/benchmarks/"
@@ -152,7 +153,7 @@ static void __run_benchmark(char *benchmark)
     }
     end = __get_clk();
     printf("Benchmark Complete.\n");
-    printf("Total number of clock cycles: %d\n" , end - start);
+    printf("Total number of clock cycles: %" PRIu64 "\n" , end - start);
 }
 
 
