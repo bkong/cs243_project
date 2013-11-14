@@ -22,12 +22,14 @@
 #include <dirent.h>
 #include <errno.h>
 #include <inttypes.h>
+#include <string.h>
 
 #define MAX_BENCHMARKS 10
-#define ITERATIONS 1000
 #define BENCHMARK_FOLDER "./src/benchmarks/"
 
-static void __run_benchmark(char *benchmark);
+static const char* EXT = ".bnch";
+
+static void __run_benchmark(char *benchmark, int iterations);
 static int __is_benchmark_file(const char *name);
 static char **__get_benchmark_names();
 
@@ -36,8 +38,10 @@ extern int errno;
 int main(int argc, char *argv[])
 {
     int i = 0;
-    int bench_num = 0;
     char **benchmarks = __get_benchmark_names();
+    char bench_str[20];
+    int iterations = 0;
+    const char *SEP = ",";
     
     if (argc <= 1)
     {
@@ -48,23 +52,34 @@ int main(int argc, char *argv[])
             printf("%d. %s\n", i+1, benchmarks[i]);
             i++;
         }
-        printf("\nEnter number: ");
-        scanf("%d", &bench_num);
+        printf("\nEnter number(s): ");
+        scanf("%s", bench_str);
+    }
+    else if (argc == 2)
+    {
+        // User entered which benchmark as command line arg
+        strcpy(bench_str, argv[1]);
     }
     else
     {
         // User entered which benchmark as command line arg
-        // TODO: allow benchmark name or number as arg
-        if (sscanf(argv[1], "%d", &bench_num) != 1)
-        {
-            printf("Invalid benchmark number: %s\n", argv[1]);
-            return -1;
-        }
+        strcpy(bench_str, argv[1]);
+        sscanf(argv[2], "%d", &iterations);
     }
     
-    if (bench_num)
+    if (!iterations)
     {
-        __run_benchmark(benchmarks[bench_num-1]);
+        printf("\nEnter number of iterations: ");
+        scanf("%d", &iterations);
+    }
+    
+    char* bench;
+    char* benches = bench_str; // change to pointer to avoid warning
+    // loop through all of the benchmarks, separated by commas
+    while((bench = strsep(&benches, SEP)) != NULL) 
+    {
+        int benchnum = atoi(bench);
+        __run_benchmark(benchmarks[benchnum-1], iterations);
     }
     return 0;
 }
@@ -81,13 +96,14 @@ static char **__get_benchmark_names()
     {
         while ((dir = readdir(d)) != NULL)
         {
+            size_t ext_len = strlen(EXT);
             char *name = dir->d_name; // get the filename
             if (__is_benchmark_file(name))
             {
-                int len = strlen(name);
-                char bench_name[len-1];
-                strncpy(bench_name, name, len - 2); // remove the '.c' part
-                bench_name[len-2] = '\0'; // null terminate the string
+                size_t len = strlen(name);
+                char bench_name[len -ext_len+1];
+                strncpy(bench_name, name, len-ext_len); // remove the '.bnch' part
+                bench_name[len-ext_len] = '\0'; // null terminate the string
                 names[dircnt] = malloc(sizeof(char)*strlen(bench_name)+1);
                 strcpy(names[dircnt], bench_name); // add the file to the array
                 dircnt++;
@@ -103,12 +119,20 @@ static int __is_benchmark_file(const char *name)
 {
     if (name != NULL)
     {
-        size_t size = strlen(name);
+        size_t size = strlen(name); // size of filename
+        size_t ext_size = strlen(EXT); // size of extension
+        int i;
         
-        if ((size >= 2) &&
-            (name[size-2] == '.') &&
-            (name[size-1] == 'c'))
+        if (size >= ext_size)
         {
+            for(i=0; i<ext_size; i++)
+            {
+                // does current char == extension?
+                if (name[size-ext_size+i] != EXT[i])
+                {
+                    return 0;
+                }
+            }
             return 1;
         }
     }
@@ -126,7 +150,7 @@ static uint64_t __get_clk()
 }
 
 /* private function to run a benchmark */
-static void __run_benchmark(char *benchmark)
+static void __run_benchmark(char *benchmark, int iterations)
 {
     int i;
     uint64_t start, end;
@@ -135,10 +159,10 @@ static void __run_benchmark(char *benchmark)
     char path[strlen(BENCHMARK_FOLDER) + strlen(benchmark) + 1];
     strcpy(path, BENCHMARK_FOLDER);
     strcat(path, benchmark);
-    printf("Starting benchmark \"%s\"...\n", benchmark);
+    strcat(path, EXT);
+    printf("Running benchmark \"%s\" for %d iterations...\n", benchmark, iterations);
     
-    
-    for (i=0;i<ITERATIONS;i++)
+    for (i=0;i<iterations;i++)
     {
         start = __get_clk();
         // Spawn child process
@@ -156,10 +180,12 @@ static void __run_benchmark(char *benchmark)
         }
         end = __get_clk();
         
-        total_clk += (end - start);
+        total_clk += ((end - start) / 1000);
     }
     printf("Benchmark Complete.\n");
-    printf("Average number of clock cycles for %d iterations: %f million\n", ITERATIONS, (total_clk / ITERATIONS)/1000000.0);
+    printf("Average number of clock cycles for %d iterations: %f million\n", 
+    iterations, 
+    (total_clk / iterations)/1000.0);
 }
 
 
