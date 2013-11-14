@@ -2,14 +2,16 @@
 
 BENCHMARKS = $(wildcard *.c)
 PROGS = $(patsubst %.c,%,$(BENCHMARKS))
+OPT = O0
+EXTENSION = .bnch
 
 #todo: different gcc flags will output different output names
 
 all: $(PROGS)
 
 %: %.c
-	@echo gcc -O0 -std=c99 -o $@ $<
-	@gcc -O0 -std=c99 -o $@ $<
+	@echo gcc -$(OPT) -std=c99 -o $@_$(OPT)$(EXTENSION) $<
+	@gcc -$(OPT) -std=c99 -o $@_$(OPT)$(EXTENSION) $<
 
 clean:
 	@if [ -a $(OUTPUT_NAME) ] ; \

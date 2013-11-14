@@ -1,14 +1,15 @@
 #Makefile for cs243 benchmarking project
 
-INPUT_FOLDER = src
-BENCHMARKS_FOLDER = src/benchmarks
+INPUT_FOLDER = ./src
+BENCHMARKS_FOLDER = ./src/benchmarks
 OUTPUT_NAME = benchmark_suite
-
+OPT = O0
 
 #todo: different gcc flags will output different output names
-
-default:
+ 
+all:
 	gcc -o $(OUTPUT_NAME) $(INPUT_FOLDER)/benchmark.c
+	@export OPT
 	@cd $(BENCHMARKS_FOLDER) ; make -s all
 
 clean:
