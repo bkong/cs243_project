@@ -88,11 +88,15 @@ static char **__get_benchmark_names()
             if (__is_benchmark_file(name))
             {
                 int len = strlen(name);
+                printf("name is %s\n", name);
+                printf("len is %d\n", len);
                 char bench_name[len-1];
                 strncpy(bench_name, name, len - 2);
                 bench_name[len-2] = '\0'; // null terminate the string
-                names[dircnt] = malloc(sizeof(char)*strlen(bench_name));
-                strcpy(names[dircnt++], bench_name);
+                printf("bench name is %s\n", bench_name);
+                names[dircnt] = malloc(sizeof(char)*strlen(bench_name)+1);
+                strcpy(names[dircnt], bench_name);
+                dircnt++;
             }
         }
         closedir(d);
@@ -153,7 +157,8 @@ static void __run_benchmark(char *benchmark)
     }
     end = __get_clk();
     printf("Benchmark Complete.\n");
-    printf("Total number of clock cycles: %" PRIu64 "\n" , end - start);
+    uint64_t total = end - start;
+    printf("Total number of clock cycles: %f million\n" , total/1000000.0);
 }
 
 
