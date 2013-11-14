@@ -24,6 +24,7 @@
 #include <inttypes.h>
 
 #define MAX_BENCHMARKS 10
+#define ITERATIONS 1000
 #define BENCHMARK_FOLDER "./src/benchmarks/"
 
 static void __run_benchmark(char *benchmark);
@@ -32,17 +33,16 @@ static char **__get_benchmark_names();
 
 extern int errno;
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
     int i = 0;
     int bench_num = 0;
-    char **benchmarks;
+    char **benchmarks = __get_benchmark_names();
     
     if (argc <= 1)
     {
         // User needs to select which benchmark to run
         printf("Choose which benchmark to run:\n");
-        benchmarks = __get_benchmark_names();
         while(benchmarks[i])
         {
             printf("%d. %s\n", i+1, benchmarks[i]);
@@ -51,24 +51,21 @@ int main(int argc, char **argv)
         printf("\nEnter number: ");
         scanf("%d", &bench_num);
     }
-    // else
-    // {
-        // // User entered which benchmark as command line arg
-        // // TODO: allow benchmark name or number as arg
-        // if (sscanf(argv[1], "%d", &bench_num) != 1)
-        // {
-            // printf("Invalid benchmark number %s\n", argv[1]);
-            // return -1;
-        // }
-    // }
-
-    if (bench_num > 4)
+    else
     {
-        printf("Benchmark number %d does not exist\n", bench_num);
-        return -1;
+        // User entered which benchmark as command line arg
+        // TODO: allow benchmark name or number as arg
+        if (sscanf(argv[1], "%d", &bench_num) != 1)
+        {
+            printf("Invalid benchmark number: %s\n", argv[1]);
+            return -1;
+        }
     }
     
-    __run_benchmark(benchmarks[bench_num-1]);
+    if (bench_num)
+    {
+        __run_benchmark(benchmarks[bench_num-1]);
+    }
     return 0;
 }
 
@@ -130,30 +127,38 @@ static uint64_t __get_clk()
 /* private function to run a benchmark */
 static void __run_benchmark(char *benchmark)
 {
+    int i;
     uint64_t start, end;
+    unsigned long long int total_clk = 0L; // Total # of clock cycles
     static char *argv[] = {"", NULL};
     char path[strlen(BENCHMARK_FOLDER) + strlen(benchmark) + 1];
     strcpy(path, BENCHMARK_FOLDER);
     strcat(path, benchmark);
     printf("Starting benchmark \"%s\"...\n", benchmark);
-        
-    start = __get_clk();
-    // Spawn child process
-    pid_t pid = fork();
-    if (pid == 0)   // Child process
+    
+    
+    for (i=0;i<ITERATIONS;i++)
     {
-        if(execv(path, argv)<0);{
-        		printf("Errno is %d\n", errno);
+        start = __get_clk();
+        // Spawn child process
+        pid_t pid = fork();
+        if (pid == 0)   // Child process
+        {
+            if(execv(path, argv)<0);{
+                    printf("Errno is %d\n", errno);
+            }
+            exit(-1);
         }
-        exit(-1);
+        else // Parent Process
+        {
+            waitpid(pid, 0, 0); // Wait for child
+        }
+        end = __get_clk();
+        
+        total_clk += (end - start);
     }
-    else // Parent Process
-    {
-        waitpid(pid, 0, 0); // Wait for child
-    }
-    end = __get_clk();
     printf("Benchmark Complete.\n");
-    printf("Total number of clock cycles: %" PRIu64 "\n" , end - start);
+    printf("Average number of clock cycles for %d iterations: %" PRIu64 "\n", ITERATIONS, (total_clk / ITERATIONS));
 }
 
 
