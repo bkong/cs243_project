@@ -9,6 +9,7 @@ OPT = O0
  
 all:
 	gcc -o $(OUTPUT_NAME) $(INPUT_FOLDER)/benchmark.c
+	gcc -o timeIt $(INPUT_FOLDER)/timeIt.c;
 	@export OPT
 	@cd $(BENCHMARKS_FOLDER) ; make -s all
 
@@ -18,5 +19,12 @@ clean:
 		echo rm $(OUTPUT_NAME) ; \
 		rm $(OUTPUT_NAME) ; \
 	fi;
+
+	@if [ -a timeIt ] ; \
+	then \
+		echo rm timeIt ; \
+		rm timeIt ; \
+	fi;
+
 	@cd $(BENCHMARKS_FOLDER) ; make -s clean
 
