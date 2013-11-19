@@ -156,7 +156,7 @@ static void __run_benchmark(char *benchmark, int iterations)
     uint64_t start, end;
     unsigned long long int total_clk = 0L; // Total # of clock cycles
     static char *argv[] = {"", NULL};
-    char path[strlen(BENCHMARK_FOLDER) + strlen(benchmark) + 1];
+    char path[strlen(BENCHMARK_FOLDER) + strlen(benchmark) + strlen(EXT) + 1];
     strcpy(path, BENCHMARK_FOLDER);
     strcat(path, benchmark);
     strcat(path, EXT);
