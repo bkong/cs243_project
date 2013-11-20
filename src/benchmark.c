@@ -94,7 +94,7 @@ static char **__get_benchmark_names()
     
     if (d > 0)
     {
-        while ((dir = readdir(d)) != NULL)
+        while ((dir = readdir(d)) != NULL && dircnt < MAX_BENCHMARKS)
         {
             size_t ext_len = strlen(EXT);
             char *name = dir->d_name; // get the filename
