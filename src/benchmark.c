@@ -29,16 +29,20 @@
 
 static const char* EXT = ".bnch";
 
+typedef struct {
+    int num;
+    char *names[10];
+} benchmark_set;
+
 static void __run_benchmark(char *benchmark, int iterations);
 static int __is_benchmark_file(const char *name);
-static char **__get_benchmark_names();
+static benchmark_set *__get_benchmarks();
 
 extern int errno;
 
 int main(int argc, char *argv[])
 {
-    int i = 0;
-    char **benchmarks = __get_benchmark_names();
+    benchmark_set *benchmarks = __get_benchmarks();
     char bench_str[20];
     int iterations = 0;
     const char *SEP = ",";
@@ -47,10 +51,13 @@ int main(int argc, char *argv[])
     {
         // User needs to select which benchmark to run
         printf("Choose which benchmark to run:\n");
-        while(benchmarks[i])
+        int i;
+        for (i=0; i<MAX_BENCHMARKS; i++)
         {
-            printf("%d. %s\n", i+1, benchmarks[i]);
-            i++;
+            if (benchmarks[i].num)
+            {
+                printf("%d. %s\n", i+1, benchmarks[i].names[0]);
+            }
         }
         printf("\nEnter number(s): ");
         scanf("%s", bench_str);
@@ -78,23 +85,33 @@ int main(int argc, char *argv[])
     // loop through all of the benchmarks, separated by commas
     while((bench = strsep(&benches, SEP)) != NULL) 
     {
-        int benchnum = atoi(bench);
-        __run_benchmark(benchmarks[benchnum-1], iterations);
+        int benchnum = atoi(bench)-1;
+        int i;
+        for (i=0; i<benchmarks[benchnum].num; i++)
+        {
+            printf("\n");
+            __run_benchmark(benchmarks[benchnum].names[i], iterations);
+        }
     }
     return 0;
 }
 
-static char **__get_benchmark_names()
+static benchmark_set *__get_benchmarks()
 {
-    char **names = malloc(sizeof(char*) * MAX_BENCHMARKS); // create array of char pointers
+    int i;
+    benchmark_set *benchmarks = malloc(sizeof(benchmark_set) * MAX_BENCHMARKS);
+    for (i=0; i<MAX_BENCHMARKS; i++)
+    {
+        benchmarks[i].num = 0;
+    }
+
     DIR *d;
-    int dircnt = 0;
     struct dirent *dir;
     d = opendir(BENCHMARK_FOLDER);
-    
+
     if (d > 0)
     {
-        while ((dir = readdir(d)) != NULL && dircnt < MAX_BENCHMARKS)
+        while ((dir = readdir(d)) != NULL)
         {
             size_t ext_len = strlen(EXT);
             char *name = dir->d_name; // get the filename
@@ -104,15 +121,23 @@ static char **__get_benchmark_names()
                 char bench_name[len -ext_len+1];
                 strncpy(bench_name, name, len-ext_len); // remove the '.bnch' part
                 bench_name[len-ext_len] = '\0'; // null terminate the string
-                names[dircnt] = malloc(sizeof(char)*strlen(bench_name)+1);
-                strcpy(names[dircnt], bench_name); // add the file to the array
-                dircnt++;
+
+                char *sep = strstr(name, "_");
+                char bench_num[sep-name+1];
+                strncpy(bench_num, name, sep-name); // grab only the benchmark number
+                bench_num[sep-name] = '\0'; // null terminate the string
+                int num = atoi(bench_num)-1;
+
+                if (num >= MAX_BENCHMARKS) continue;
+
+                benchmarks[num].names[benchmarks[num].num] = malloc(sizeof(char)*strlen(bench_name)+1);
+                strcpy(benchmarks[num].names[benchmarks[num].num], bench_name); // add the file to the benchmark set
+                benchmarks[num].num++;
             }
         }
         closedir(d);
     }
-    
-    return names;
+    return benchmarks;
 }
 
 static int __is_benchmark_file(const char *name)
