@@ -1,2 +1,5 @@
 *.c~
 *.bnch
+*.py~
+*.pyc
+*.DS_Store
