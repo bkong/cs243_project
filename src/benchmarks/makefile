@@ -14,8 +14,5 @@ all: $(PROGS)
 	@gcc -$(OPT) -std=c99 -o $@_$(OPT)$(EXTENSION) $<
 
 clean:
-	@if [ -a $(OUTPUT_NAME) ] ; \
-	then \
-		echo rm -f $(PROGS) ; \
-		rm -f $(PROGS) ; \
-	fi;
+	@echo rm -f $(PROGS)
+	@rm -f $(PROGS)

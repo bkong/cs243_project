@@ -26,6 +26,7 @@
 
 #define MAX_BENCHMARKS 10
 #define BENCHMARK_FOLDER "./src/benchmarks/"
+#define BENCHMARK_RESULT_FILE "./benchmark_results.csv"
 
 static const char* EXT = ".bnch";
 
@@ -37,6 +38,7 @@ typedef struct {
 static void __run_benchmark(char *benchmark, int iterations);
 static int __is_benchmark_file(const char *name);
 static benchmark_set *__get_benchmarks();
+static void __save_results(const char *name, unsigned long long int clockcycles, int iterations);
 
 extern int errno;
 
@@ -177,7 +179,7 @@ static uint64_t __get_clk()
 /* private function to run a benchmark */
 static void __run_benchmark(char *benchmark, int iterations)
 {
-    int i;
+    int i, prev_percent = 0;
     uint64_t start, end;
     unsigned long long int total_clk = 0L; // Total # of clock cycles
     static char *argv[] = {"", NULL};
@@ -189,6 +191,14 @@ static void __run_benchmark(char *benchmark, int iterations)
     
     for (i=0;i<iterations;i++)
     {
+        // Print out the percent complete
+        int percent = (i*100) / iterations;
+        if (percent > (prev_percent + 5)) // Print every 5 percent at most
+        {
+            prev_percent = percent;
+            printf("%d%% complete...\n", percent);
+        }
+
         start = __get_clk();
         // Spawn child process
         pid_t pid = fork();
@@ -204,13 +214,39 @@ static void __run_benchmark(char *benchmark, int iterations)
             waitpid(pid, 0, 0); // Wait for child
         }
         end = __get_clk();
-        
-        total_clk += ((end - start) / 1000);
+        total_clk += (end - start);
     }
     printf("Benchmark Complete.\n");
     printf("Average number of clock cycles for %d iterations: %f million\n", 
-    iterations, 
-    (total_clk / iterations)/1000.0);
+        iterations, 
+        (total_clk / iterations)/1000.0);
+    __save_results(benchmark, total_clk, iterations);
 }
 
+static void __save_results(const char *name, unsigned long long int clockcycles, int iterations)
+{
+    FILE *fs = fopen(BENCHMARK_RESULT_FILE, "r"); // Check if file exists already
+    if (fs == NULL)
+    {
+        // File must not exist... create one
+        fs = fopen(BENCHMARK_RESULT_FILE, "w");
+        if (fs == NULL)
+        {
+            // If it is still null, then something is wrong
+            printf("ERROR opening results file!\n");
+            return;
+        }
+        // Print the header since we just created the file
+        fprintf(fs, "Benchmark Name,Clock Cycles,Iterations,Average (in millions of clock cycles)\n");
+    }
+    else
+    {
+        fclose(fs);
+        // Open to append
+        fs = fopen(BENCHMARK_RESULT_FILE, "a");
+    }
 
+    fprintf(fs, "%s,%llu,%d,%f\n", name, clockcycles, iterations, (clockcycles / iterations)/1000.0);
+    fclose(fs);
+    printf("Results saved to %s\n", BENCHMARK_RESULT_FILE);
+}

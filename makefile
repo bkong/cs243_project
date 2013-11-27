@@ -4,6 +4,7 @@ INPUT_FOLDER = ./src
 BENCHMARKS_FOLDER = ./src/benchmarks
 OUTPUT_NAME = benchmark_suite
 OPT = O0
+RESULTS_FILE = ./benchmark_results.csv
 
 #todo: different gcc flags will output different output names
  
@@ -26,5 +27,10 @@ clean:
 		rm timeIt ; \
 	fi;
 
-	@cd $(BENCHMARKS_FOLDER) ; make -s clean
+	@if [ -a $(RESULTS_FILE) ] ; \
+	then \
+		echo rm $(RESULTS_FILE) ; \
+		rm $(RESULTS_FILE) ; \
+	fi;
 
+	@cd $(BENCHMARKS_FOLDER) ; make -s clean
