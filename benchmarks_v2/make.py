@@ -10,8 +10,12 @@ srcFiles = listdir(srcDir)
 srcFiles = filter(lambda x: '~' not in x, srcFiles) #remove temporary files from list
 optFile = "optimizations.txt"
 
-with open(optFile, 'r') as f:
+f = open(optFile, 'r')
+
+try:
 	optimizations = [line.strip() for line in f]
+finally:
+    f.close()
 optimizations.append('')
 
 success = True
