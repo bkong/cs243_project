@@ -1,13 +1,14 @@
 #include <iostream>
 #include <list>
 #include <numeric>
+#include <algo.h>
 
 const size_t SIZE = 10000;
 
 size_t test_lists() {
     std::list<size_t> li1(SIZE);
 
-    std::iota(li1.begin(), li1.end(), 1);
+    iota(li1.begin(), li1.end(), 1);
 
     std::list<size_t> li2(li1);
 
