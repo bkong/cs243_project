@@ -3,11 +3,15 @@
 import subprocess
 from os import listdir, system
 from os.path import join
+from sys import argv
 
 srcDir = "src/"
 compDir = "compiled/"
-srcFiles = listdir(srcDir)
-srcFiles = filter(lambda x: '~' not in x, srcFiles) #remove temporary files from list
+if len(argv) > 1: #program to compile specified
+	srcFiles = [argv[1]]
+else:
+	srcFiles = listdir(srcDir)
+	srcFiles = filter(lambda x: '~' not in x, srcFiles) #remove temporary files from list
 optFile = "optimizations.txt"
 
 f = open(optFile, 'r')
@@ -40,3 +44,6 @@ if success:
 	print "All compilation completed successfully"
 else:
 	print "compile errors with %s" % errors
+
+#compile the benchmark suite
+system("gcc -o benchmark_suite benchmark.c")
