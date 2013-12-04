@@ -9,13 +9,12 @@ int main(){
 	#define arrSize 200000000
 	srand(time(NULL));
 	
-	int* arr = malloc(sizeof(int)*arrSize);
+	int* arr = (int*)malloc(sizeof(int)*arrSize);
 	
 	int i;
-	for(i=0; i<arrSize; i++){
+	for(i=0; i<arrSize; i++)
+    {
 		int r = rand()%arrSize;
 		arr[r] = i;
-		
-		}
-		
+    }
 }

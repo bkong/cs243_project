@@ -1,10 +1,13 @@
 //test performance of a quicksort algorithm.  Note that the array is hard-coded in here so to ensure that the benchmark is 'pure' (i.e. we're not benchmarking load time for a file, we're actually benchmarking quicksort)
 
-
 #include <stdio.h>
-static void swap(void *x, void *y, size_t l) {
-   char *a = x, *b = y, c;
-   while(l--) {
+static void swap(void *x, void *y, size_t l) 
+{
+   char *a = (char *)x;
+   char *b = (char *)y;
+   char c;
+   while(l--)
+   {
       c = *a;
       *a++ = *b;
       *b++ = c;
@@ -33,7 +36,7 @@ static void sort(char *array, size_t size, int (*cmp)(void*,void*), int begin, i
 }
  
 void qsort(void *array, size_t nitems, size_t size, int (*cmp)(void*,void*)) {
-   sort(array, size, cmp, 0, (nitems-1)*size);
+   sort((char *)array, size, cmp, 0, (nitems-1)*size);
 }
  
 typedef int type;
