@@ -10,7 +10,8 @@ int Ack(int M, int N) {
 }
 
 int main(int argc, char *argv[]) {
-    int n = atoi(argv[1]);
+    //int n = atoi(argv[1]);
+    int n = 10;
 
     cout << "Ack(3," << n << "): " << Ack(3, n) << endl;
 
