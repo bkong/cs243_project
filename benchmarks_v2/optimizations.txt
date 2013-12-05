@@ -1,2 +1,11 @@
 -funroll-loops
+-funroll-all-loops
 -ffast-math
+-fexpensive-optimizations
+-finline-functions
+-fno-inline
+-funsafe-loop-optimizations
+-ftree-loop-distribution
+-fguess-branch-probability
+-fno-guess-branch-probability
+-fdelayed-branch
