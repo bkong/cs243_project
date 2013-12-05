@@ -27,11 +27,12 @@
 #define MAX_BENCHMARKS 10
 #define BENCHMARK_FOLDER "./compiled/"
 #define BENCHMARK_RESULT_FILE "./benchmark_results.csv"
-#define ITERATIONS 5 // Number of times to run each benchmark
+#define ITERATIONS 1 // Number of times to run each benchmark
 
 static void __run_benchmark(char *benchmark);
 static char ** __get_benchmarks(int* size);
 static void __save_results(const char *name, unsigned long long int clockcycles, int iterations);
+static char ** __get_optimizations(const char *bench_name);
 
 extern int errno;
 
@@ -139,34 +140,77 @@ static void __run_benchmark(char *benchmark)
     printf("Benchmark Complete.\n");
     printf("Average number of clock cycles for %d iterations: %f million\n", 
         iterations, 
-        (total_clk / iterations)/1000.0);
+        (total_clk / iterations)/1000000.0);
     __save_results(benchmark, total_clk, iterations);
 }
 
 static void __save_results(const char *name, unsigned long long int clockcycles, int iterations)
 {
-    FILE *fs = fopen(BENCHMARK_RESULT_FILE, "r"); // Check if file exists already
-    if (fs == NULL)
+    char **benchmark_info = __get_optimizations(name);
+    int column = 1; // column to write the result to
+    
+    FILE *fp = fopen(BENCHMARK_RESULT_FILE, "r"); // to read the file
+    if (fp == NULL)
     {
-        // File must not exist... create one
-        fs = fopen(BENCHMARK_RESULT_FILE, "w");
-        if (fs == NULL)
+        // File didnt exist before;
+        fp = fopen(BENCHMARK_RESULT_FILE, "w"); // to write to file
+        if (fp == NULL)
         {
             // If it is still null, then something is wrong
             printf("ERROR opening results file!\n");
             return;
         }
         // Print the header since we just created the file
-        fprintf(fs, "Benchmark Name,Clock Cycles,Iterations,Average (in millions of clock cycles)\n");
+        fprintf(fp, "Benchmark Name,Compiler Flag(s),Result\n");
     }
     else
     {
-        fclose(fs);
-        // Open to append
-        fs = fopen(BENCHMARK_RESULT_FILE, "a");
+        fclose(fp);
+        // Open to update
+        fp = fopen(BENCHMARK_RESULT_FILE, "a");
     }
 
-    fprintf(fs, "%s,%llu,%d,%f\n", name, clockcycles, iterations, (clockcycles / iterations)/1000.0);
-    fclose(fs);
+    fprintf(fp, "%s,%s,%f\n", benchmark_info[0], benchmark_info[1], (clockcycles / iterations)/1000.0);
+    fclose(fp);
+    free(benchmark_info[0]);
+    free(benchmark_info[1]);
+    free(benchmark_info);
     printf("Results saved to %s\n", BENCHMARK_RESULT_FILE);
+}
+
+// Returns an array of two elements containing
+// [0]: Benchmark name
+// [1]: Optimization flag
+static char ** __get_optimizations(const char *bench_name)
+{
+    char **result = malloc(sizeof(char *) * 2);
+    int i = 0;
+    int full_length = strlen(bench_name);
+    char c;
+    
+    do
+    {
+        c = bench_name[i++];
+    }
+    while( (c != '-') && (c != '\0') );
+    
+    result[0] = malloc(sizeof(char)*(i-1));
+    strncpy(result[0], bench_name, i-1);
+    result[0][i-1] = '\0'; // null terminate the string
+    
+    printf("bench: %s\n", result[0]);
+    
+    result[1] = malloc(sizeof(char)*(full_length - (i-3)));
+    if ((full_length - i) > 0)
+    {
+        strcpy(result[1], &bench_name[i]);
+    }
+    else
+    {
+        strcpy(result[1], "");
+    }
+    
+    printf("opti: %s\n", result[1]);
+    
+    return result;
 }
