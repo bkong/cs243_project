@@ -5,7 +5,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 	//by default, n is 5
-    int n = ((argc == 2) ? atoi(argv[1]) : 5);
+    int n = ((argc == 2) ? atoi(argv[1]) : 20);
     int a, b, c, d, e, f, x=0;
 
     for (a=0; a<n; a++)
