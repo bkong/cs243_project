@@ -24,10 +24,9 @@
 #include <inttypes.h>
 #include <string.h>
 
-#define MAX_BENCHMARKS 10
 #define BENCHMARK_FOLDER "./compiled/"
 #define BENCHMARK_RESULT_FILE "./benchmark_results.csv"
-#define ITERATIONS 1 // Number of times to run each benchmark
+#define ITERATIONS 20 // Number of times to run each benchmark
 
 static void __run_benchmark(char *benchmark);
 static char ** __get_benchmarks(int* size);
